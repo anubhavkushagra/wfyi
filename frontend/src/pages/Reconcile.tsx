@@ -148,9 +148,21 @@ export function Reconcile() {
     // ... (handleReconcile)
 
     const saveReport = async () => {
-        if (report && user) {
-            await api.reports.save(report);
-            navigate('/reports');
+        if (!user || !user.id) {
+            alert('You must be logged in to save a report.');
+            return;
+        }
+
+        if (report) {
+            try {
+                // Ensure userId is present even if it was missing during initial generation
+                const reportToSave = { ...report, userId: user.id };
+                await api.reports.save(reportToSave);
+                navigate('/reports');
+            } catch (error) {
+                console.error('Failed to save report:', error);
+                alert('Failed to save report. Please try again.');
+            }
         }
     };
 

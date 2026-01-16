@@ -1,0 +1,14 @@
+{
+    "name": "wfyi-assignment",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "node api/index.js",
+        "build": "echo 'No build step for backend' && exit 0"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.3",
+        "express": "^5.2.1",
+        "mongoose": "^8.21.0"
+    }
+}
