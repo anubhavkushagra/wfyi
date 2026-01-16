@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@theme {
+  --font-sans: "Open Sans", sans-serif;
+  --color-background: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-primary: #cb0c9f;
+  --color-primary-hover: #a30a8c;
+  --color-text-main: #344767;
+  --color-text-muted: #67748e;
+  --shadow-soft-xl: 0 8px 26px -4px hsla(0, 0%, 8%, .15);
+}
