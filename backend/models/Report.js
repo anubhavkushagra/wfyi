@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now },
+    userId: { type: String, required: true, index: true },
     fileAName: String,
     fileBName: String,
     totalRecords: Number,

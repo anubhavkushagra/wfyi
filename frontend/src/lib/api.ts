@@ -32,8 +32,8 @@ export const api = {
             await client.post('/reports', report);
         },
 
-        getAll: async (): Promise<ReconciliationReport[]> => {
-            const { data } = await client.get('/reports');
+        getAll: async (userId: string): Promise<ReconciliationReport[]> => {
+            const { data } = await client.get(`/reports?userId=${userId}`);
             return data;
         }
     }

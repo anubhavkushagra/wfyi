@@ -11,8 +11,10 @@ export function Dashboard() {
     const [reports, setReports] = useState<ReconciliationReport[]>([]);
 
     useEffect(() => {
-        api.reports.getAll().then(setReports).catch(console.error);
-    }, []);
+        if (user?.id) {
+            api.reports.getAll(user.id).then(setReports).catch(console.error);
+        }
+    }, [user?.id]);
 
     // Quick stats
     const totalReconciliations = reports.length;

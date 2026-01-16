@@ -19,6 +19,7 @@ export interface ReconciliationRecord {
 
 export interface ReconciliationReport {
     id: string;
+    userId: string;
     date: string;
     fileAName: string;
     fileBName: string;

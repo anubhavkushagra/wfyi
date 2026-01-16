@@ -9,8 +9,10 @@ import { api } from '../lib/api';
 import { CheckCircle2, AlertOctagon, Save } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export function Reconcile() {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [fileA, setFileA] = useState<File | null>(null);
     const [fileB, setFileB] = useState<File | null>(null);
@@ -109,6 +111,7 @@ export function Reconcile() {
 
         setReport({
             id: crypto.randomUUID(),
+            userId: user?.id || '',
             date: new Date().toISOString(),
             fileAName: fileA!.name || 'File A',
             fileBName: fileB!.name || 'File B',
@@ -140,8 +143,12 @@ export function Reconcile() {
         });
     };
 
+
+
+    // ... (handleReconcile)
+
     const saveReport = async () => {
-        if (report) {
+        if (report && user) {
             await api.reports.save(report);
             navigate('/reports');
         }

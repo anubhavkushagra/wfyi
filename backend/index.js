@@ -54,7 +54,12 @@ app.post('/api/login', async (req, res) => {
 // 2. Reports
 app.get('/api/reports', async (req, res) => {
     try {
-        const reports = await Report.find().sort({ createdAt: -1 });
+        const { userId } = req.query;
+        if (!userId) {
+            return res.status(400).json({ error: 'UserId is required' });
+        }
+
+        const reports = await Report.find({ userId }).sort({ createdAt: -1 });
         // Transform _id to id
         const formatted = reports.map(r => ({
             id: r._id.toString(),
@@ -63,6 +68,8 @@ app.get('/api/reports', async (req, res) => {
             fileBName: r.fileBName,
             totalRecords: r.totalRecords,
             matchedCount: r.matchedCount,
+            matchedCountPercentage: r.totalRecords ? ((r.matchedCount * 2) / r.totalRecords) * 100 : 0, // Added for convenience if needed
+            mismatchCount: r.mismatchCount,
             unmatchedACount: r.unmatchedACount,
             unmatchedBCount: r.unmatchedBCount
         }));
@@ -75,6 +82,12 @@ app.get('/api/reports', async (req, res) => {
 app.post('/api/reports', async (req, res) => {
     try {
         const reportData = req.body;
+
+        // Basic validation
+        if (!reportData.userId) {
+            return res.status(400).json({ error: 'UserId is required to save a report' });
+        }
+
         const newReport = new Report(reportData);
         await newReport.save();
 

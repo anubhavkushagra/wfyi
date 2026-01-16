@@ -4,12 +4,17 @@ import { FileClock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import type { ReconciliationReport } from '../lib/types';
 
+import { useAuth } from '../context/AuthContext';
+
 export function Reports() {
+    const { user } = useAuth();
     const [reports, setReports] = useState<ReconciliationReport[]>([]);
 
     useEffect(() => {
-        api.reports.getAll().then(setReports).catch(console.error);
-    }, []);
+        if (user?.id) {
+            api.reports.getAll(user.id).then(setReports).catch(console.error);
+        }
+    }, [user?.id]);
 
     return (
         <div className="space-y-8">
