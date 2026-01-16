@@ -41,6 +41,9 @@ export function Sidebar() {
             </nav>
 
             <div className="p-4 border-t border-gray-100">
+                <div className="px-4 py-2 mb-2 text-xs text-center text-gray-400 font-mono">
+                    v1.1 (Search Active)
+                </div>
                 <button
                     onClick={logout}
                     className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
