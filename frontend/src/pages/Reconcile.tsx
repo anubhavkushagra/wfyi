@@ -11,6 +11,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+import { Input } from '../components/ui/Input';
+
 export function Reconcile() {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -19,6 +21,31 @@ export function Reconcile() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [report, setReport] = useState<ReconciliationReport | null>(null);
     const [records, setRecords] = useState<ReconciliationRecord[]>([]);
+
+    // Search & Filter State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterType, setFilterType] = useState<'all' | 'mismatch' | 'missing_a' | 'missing_b'>('all');
+
+    // Filter Logic
+    const filteredRecords = records.filter(r => {
+        if (r.status === 'matched') return false; // Always hide matched
+
+        // 1. Filter by Type
+        if (filterType === 'mismatch' && r.status !== 'mismatch') return false;
+        if (filterType === 'missing_a' && r.status !== 'unmatched_b') return false; // Missing in A means it is unmatched_b
+        if (filterType === 'missing_b' && r.status !== 'unmatched_a') return false; // Missing in B means it is unmatched_a
+
+        // 2. Search
+        if (!searchTerm) return true;
+        const lowerSearch = searchTerm.toLowerCase();
+
+        const idMatch = r.id && r.id.toLowerCase().includes(lowerSearch);
+        const amountMatch = (r.amount?.toString().includes(searchTerm)) ||
+            (r.originalAmount?.toString().includes(searchTerm)) ||
+            (r.counterpartAmount?.toString().includes(searchTerm));
+
+        return idMatch || amountMatch;
+    });
 
     // Simple fuzzy match logic
     const reconcileData = async (dataA: any[], dataB: any[]) => {
@@ -293,8 +320,27 @@ export function Reconcile() {
 
                         {/* Discrepancy Details Table */}
                         <Card className="lg:col-span-2 overflow-hidden p-0 min-h-[400px]">
-                            <div className="p-6 border-b border-gray-100">
+                            <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
                                 <h3 className="font-bold text-gray-800">Discrepancy Details</h3>
+                                <div className="flex w-full md:w-auto gap-4">
+                                    <div className="w-full md:w-64">
+                                        <Input
+                                            placeholder="Search by ID or Amount..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+                                    </div>
+                                    <select
+                                        className="h-11 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all cursor-pointer"
+                                        value={filterType}
+                                        onChange={(e) => setFilterType(e.target.value as any)}
+                                    >
+                                        <option value="all">All Discrepancies</option>
+                                        <option value="mismatch">Mismatches Only</option>
+                                        <option value="missing_a">Missing in A</option>
+                                        <option value="missing_b">Missing in B</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left">
@@ -308,10 +354,10 @@ export function Reconcile() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {records.filter(r => r.status !== 'matched').map((record, idx) => {
+                                        {filteredRecords.map((record, idx) => {
                                             let diff = record.amount;
                                             if (record.status === 'mismatch' && record.originalAmount !== undefined && record.counterpartAmount !== undefined) {
-                                                diff = record.originalAmount - record.counterpartAmount;
+                                                diff = Math.abs(record.originalAmount - record.counterpartAmount);
                                             }
 
                                             return (
@@ -341,10 +387,10 @@ export function Reconcile() {
                                                 </tr>
                                             );
                                         })}
-                                        {records.filter(r => r.status !== 'matched').length === 0 && (
+                                        {filteredRecords.length === 0 && (
                                             <tr>
                                                 <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
-                                                    No discrepancies found!
+                                                    No matching discrepancies found.
                                                 </td>
                                             </tr>
                                         )}
